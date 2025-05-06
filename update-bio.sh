@@ -25,7 +25,7 @@ req=$(curl -sG -H "Authorization: $auth" $XRPC/com.atproto.repo.getRecord \
 while
   res=$(! curl --fail-with-body -sH "Authorization: $auth" $XRPC/com.atproto.repo.putRecord --json "$req")
 do
-  err=$(echo "$res" | jq .error)
+  err=$(echo "$res" | jq -r .error)
 
   if [ "$err" = "InvalidToken" ] || [ "$err" = "ExpiredToken" ]; then
     . ./refresh.sh
