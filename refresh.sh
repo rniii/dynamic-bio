@@ -2,11 +2,12 @@ echo "refreshing session"
 
 auth="Bearer $(jq -r .refreshJwt session.json)"
 
-curl -s https://bsky.social/xrpc/com.atproto.server.refreshSession \
-  -H "Authorization: $auth" |
-  jq '{ accessJwt, refreshJwt }' > session.json
+sess=$(curl -sX POST -H "Authorization: $auth" https://bsky.social/xrpc/com.atproto.server.refreshSession)
+err=$(echo "$sess" | jq .error)
 
-[ "$(jq .accessJwt session.json)" = "null" ] && {
-  echo "invalid session"
-  rm session.json
-}
+if [ "$err" = "null" ]; then
+  echo "$sess" | jq '{ accessJwt, refreshJwt }' > session.json
+else
+  echo "invalid session: $sess"
+  . ./login.sh
+fi
